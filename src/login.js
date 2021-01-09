@@ -9,7 +9,6 @@ import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
 
 export default function Login() {
-    const gridStyle = {Grid: {style: {minHeight: '100vh', alignItems: 'center', }}}
     const formFields = [
         {
             label: 'Email',
@@ -58,14 +57,13 @@ export default function Login() {
     }
 
     return (
-        <Grid gridColumns={1} gridMaxWidth={400} overrides={gridStyle}>
+        <Grid gridColumns={1} gridMaxWidth={400}
+              overrides={{Grid: {style: {minHeight: '100vh', alignItems: 'center'}}}}>
             <Cell>
                 <HeadingLevel>
                     <Heading>Login or Register?</Heading>
                     <Paragraph3>
-                        Which one is it? What is the purpose of this form? Are you crating an account or just
-                        wasting time struggling to pass the form validation?<br/>
-                        You may never learn the answers to all of those questions...
+                        Lorem ipsum dolor sit amet, consectetur adipisicing elit
                     </Paragraph3>
                 </HeadingLevel>
                 <Formik
@@ -90,10 +88,27 @@ export default function Login() {
                     {formik =>
                         <Form>
                             {formFields.map((field, index) =>
-                                <FormControl key={index} label={field.label} htmlFor={field.name}
-                                             error={formik.touched[field.name] && formik.errors[field.name] ? formik.errors[field.name] : null}>
-                                    <Input id={field.name} type={field.type}
-                                           error={formik.touched[field.name] && formik.errors[field.name] ? true : null}
+                                <FormControl key={index}
+                                             label={field.label}
+                                             htmlFor={field.name}
+                                             error={
+                                                 formik.touched[field.name] &&
+                                                 formik.errors[field.name] ?
+                                                     formik.errors[field.name] : null
+                                             }>
+                                    <Input id={field.name}
+                                           type={field.type}
+                                           error={
+                                               formik.touched[field.name] &&
+                                               formik.errors[field.name] ?
+                                                   true : null
+                                           }
+                                           positive={
+                                               'password' === field.type &&
+                                               formik.touched[field.name] &&
+                                               ! formik.errors[field.name] ?
+                                                   true : null
+                                           }
                                            {...formik.getFieldProps(field.name)} />
                                 </FormControl>
                             )}
