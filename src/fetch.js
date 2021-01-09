@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 function useFetch(url) {
-    let [responseData, setResponseData] = useState('');
+    let [responseData, setResponseData] = useState([]);
     const fetchData = useCallback(() => {
         axios({
             "method": "GET",
