@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import { useFetch } from "./fetch";
 import {
     StatefulDataTable,
+    DatetimeColumn,
     NumericalColumn,
     StringColumn,
 } from 'baseui/data-table';
@@ -36,15 +37,16 @@ const Users = () => {
         "https://test-api-server.herokuapp.com/users"
     );
 
-    const data = useMemo( () => {
-        return rawData.map(r => ({id: r.id, date: r.date}));
-    } , [ rawData ] )
+    const data = useMemo(() => {
+        return rawData.map(r => ({id: r.id, data: r}));
+    }, [rawData])
 
     return (
-       data.length && <>
-            <StatefulDataTable columns={columns} rows={data}/>
-            <pre>{JSON.stringify(data)}</pre>
+        data.length && <>
+            <div style={{height: '800px'}}>
+                <StatefulDataTable columns={columns} rows={data}/>
+            </div>
         </>
-    );
+    )
 }
 export default Users;
