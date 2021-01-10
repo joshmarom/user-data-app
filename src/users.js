@@ -1,11 +1,14 @@
-import React from 'react';
-import { useMemo } from 'react';
-import { useFetch } from "./fetch";
+import React, { useState, useEffect } from 'react';
+import axios from "axios";
+import { Grid, Cell } from 'baseui/layout-grid';
+import Overflow from 'baseui/icon/overflow';
+import {StyledSpinnerNext} from 'baseui/spinner';
 import {
     StatefulDataTable,
     DatetimeColumn,
     NumericalColumn,
     StringColumn,
+    COLUMNS
 } from 'baseui/data-table';
 
 const columns = [
@@ -21,32 +24,75 @@ const columns = [
         title: 'Last Name',
         mapDataToValue: (user) => user.lastName,
     }),
-    StringColumn({
+    DatetimeColumn({
         title: 'Date',
-        //format: COLUMNS.DATETIME,
-        mapDataToValue: (user) => user.date,
+        formatString: 'dd/MM/yyyy',
+        mapDataToValue: (user) => new Date(user.date),
     }),
     StringColumn({
         title: 'Phone',
-        mapDataToValue: (user) => user.phone,
+        mapDataToValue: (user) => {
+            const regex = /.+?(?= x)/
+            const match = user.phone.match( regex )
+            return match || user.phone
+        },
     }),
 ];
 
 const Users = () => {
-    const rawData = useFetch(
-        "https://test-api-server.herokuapp.com/users"
-    );
+    const url = 'https://test-api-server.herokuapp.com/users'
+    const [isLoading, setIsLoading] = useState(false)
+    const [isError, setIsError] = useState(false)
+    const [responseData, setData] = useState([])
 
-    const data = useMemo(() => {
-        return rawData.map(r => ({id: r.id, data: r}));
-    }, [rawData])
+    useEffect(() => {
+        const fetchData = async () => {
+            setIsError(false);
+            setIsLoading(true);
+
+            await axios.get(url)
+                .then((response) => {
+                    const reformattedResponseData = response.data.map(r => ({id: r.id, data: r}))
+                    setData(reformattedResponseData)
+                })
+                .catch(() => setIsError(true))
+
+            setIsLoading(false);
+        };
+
+        fetchData();
+    }, []);
+
+    function editUser(userData) {
+        console.log(userData)
+    }
+
+    const rowActions = [
+        {
+            label: 'Edit',
+            onClick: ({row}) => editUser(row.data),
+            renderIcon: ({size}) => (<Overflow size={size} />),
+        },
+    ]
+
+    const tableProps = {
+        columns: columns,
+        rowActions: rowActions,
+        rows: responseData,
+        loading: isLoading,
+        loadingMessage: () => (<StyledSpinnerNext $as="span"/>),
+    }
 
     return (
-        data.length && <>
-            <div style={{height: '800px'}}>
-                <StatefulDataTable columns={columns} rows={data}/>
-            </div>
-        </>
-    )
+        <Grid gridColumns={1} gridMaxWidth={800}>
+            <Cell>
+                <div style={{height: '600px'}}>
+                    {!isError && <StatefulDataTable {...tableProps}/>}
+                    {isError && <pre>Failed to load user data</pre>}
+                </div>
+            </Cell>
+        </Grid>
+    );
 }
+
 export default Users;
