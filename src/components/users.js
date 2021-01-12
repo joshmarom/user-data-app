@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from "axios";
+import EditUser from './edit-user';
+import { useOvermind } from "../overmind";
 import { Grid, Cell } from 'baseui/layout-grid';
 import Overflow from 'baseui/icon/overflow';
 import {StyledSpinnerNext} from 'baseui/spinner';
@@ -8,7 +9,6 @@ import {
     DatetimeColumn,
     NumericalColumn,
     StringColumn,
-    COLUMNS
 } from 'baseui/data-table';
 
 const columns = [
@@ -37,40 +37,15 @@ const columns = [
             return match || user.phone
         },
     }),
-];
+]
 
 const Users = () => {
-    const url = 'https://test-api-server.herokuapp.com/users'
-    const [isLoading, setIsLoading] = useState(false)
-    const [isError, setIsError] = useState(false)
-    const [responseData, setData] = useState([])
-
-    useEffect(() => {
-        const fetchData = async () => {
-            setIsError(false);
-            setIsLoading(true);
-
-            await axios.get(url)
-                .then((response) => {
-                    const reformattedResponseData = response.data.map(r => ({id: r.id, data: r}))
-                    setData(reformattedResponseData)
-                })
-                .catch(() => setIsError(true))
-
-            setIsLoading(false);
-        };
-
-        fetchData();
-    }, []);
-
-    function editUser(userData) {
-        console.log(userData)
-    }
+    const { state } = useOvermind();
 
     const rowActions = [
         {
             label: 'Edit',
-            onClick: ({row}) => editUser(row.data),
+            onClick: ({row}) => editUser(row.id),
             renderIcon: ({size}) => (<Overflow size={size} />),
         },
     ]
@@ -78,21 +53,38 @@ const Users = () => {
     const tableProps = {
         columns: columns,
         rowActions: rowActions,
-        rows: responseData,
-        loading: isLoading,
+        rows: state.users,
+        loading: state.isLoadingUsers,
         loadingMessage: () => (<StyledSpinnerNext $as="span"/>),
+    }
+
+    const [editingUser, setEditingUser] = useState(false);
+    const [userData, setUserData] = useState({});
+
+    function editUser(id) {
+        const data = state.users[id].data
+        setEditingUser(true)
+        setUserData(data)
+        console.log(editingUser,userData)
+    }
+
+    function closeModal() {
+        setEditingUser(false);
     }
 
     return (
         <Grid gridColumns={1} gridMaxWidth={800}>
             <Cell>
                 <div style={{height: '600px'}}>
-                    {!isError && <StatefulDataTable {...tableProps}/>}
-                    {isError && <pre>Failed to load user data</pre>}
+                    <StatefulDataTable {...tableProps}/>
+                    <EditUser
+                        onClose={closeModal}
+                        userData={userData} isOpen={editingUser}/>
                 </div>
             </Cell>
         </Grid>
-    );
+    )
 }
 
 export default Users;
+

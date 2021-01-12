@@ -7,8 +7,12 @@ import { Heading, HeadingLevel } from 'baseui/heading';
 import { Paragraph3} from 'baseui/typography';
 import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
+import { useOvermind } from '../overmind';
+
 
 export default function Login() {
+    const { actions } = useOvermind();
+
     const formFields = [
         {
             label: 'Email',
@@ -74,17 +78,7 @@ export default function Login() {
                         password: '',
                     }}
                     validationSchema={validationSchema}
-                /*  onSubmit={async (values) => {
-                            await new Promise((r) => setTimeout(r, 500));
-                            alert(JSON.stringify(values, null, 2));
-                    }}*/
-                    onSubmit={( values, { setSubmitting, resetForm } ) => {
-                        setTimeout( () => {
-                            console.log( JSON.stringify( values, null, 2 ) );
-                            resetForm();
-                            setSubmitting( false );
-                        }, 3000 );
-                    }}>
+                    onSubmit={()=>(actions.login())}>
                     {formik =>
                         <Form>
                             {formFields.map((field, index) =>
