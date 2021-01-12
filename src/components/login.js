@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Grid, Cell } from 'baseui/layout-grid';
 import { FormControl } from 'baseui/form-control';
 import { Input } from 'baseui/input';
@@ -8,10 +8,10 @@ import { Paragraph3} from 'baseui/typography';
 import { Form, Formik } from 'formik';
 import * as Yup from 'yup';
 import { useOvermind } from '../overmind';
-
+import history from '../history';
 
 export default function Login() {
-    const { actions } = useOvermind();
+    const {state, actions} = useOvermind()
 
     const formFields = [
         {
@@ -55,10 +55,25 @@ export default function Login() {
     ];
 
     const validationSchema = () => {
-        const schemaObject = {};
+        const schemaObject = {}
         formFields.map(field => schemaObject[field.name] = field.validationSchema);
         return Yup.object(schemaObject);
     }
+
+    const [formValues, setFormValues] = useState('')
+    const [error, setError] = useState('')
+
+    const doLogin = async () => {
+        console.log(formValues, error);
+
+        let response = await actions.doLogin(formValues);
+        if (!state.error) {
+            console.log(response);
+            history.push('/');
+        } else {
+            setError(state.error.message);
+        }
+    };
 
     return (
         <Grid gridColumns={1} gridMaxWidth={400}
@@ -70,6 +85,7 @@ export default function Login() {
                         Lorem ipsum dolor sit amet, consectetur adipisicing elit
                     </Paragraph3>
                 </HeadingLevel>
+                {state.error && <h2>{error}</h2>}
                 <Formik
                     initialValues={{
                         email: '',
@@ -78,7 +94,10 @@ export default function Login() {
                         password: '',
                     }}
                     validationSchema={validationSchema}
-                    onSubmit={()=>(actions.login())}>
+                    onSubmit={(values) => {
+                        setFormValues(values);
+                        doLogin();
+                    }}>
                     {formik =>
                         <Form>
                             {formFields.map((field, index) =>

@@ -1,9 +1,9 @@
 // initial state
 
 export const state = {
+    error: false,
+    currentUser: null,
     isLoggedIn: false,
-    adminInfo: {},
-    currentPage: "home",
     isLoadingUsers: false,
     isLoadingUserDetails: false,
     users: [],

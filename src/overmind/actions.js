@@ -2,22 +2,40 @@ import { parallel, action } from "overmind";
 
 export const switchTheme = ({ state }) => {
     state.theme = 'light' === state.theme ? 'dark' : 'light';
-};
+}
 
-export const login = action(
-    async ({ state, effects }) => {
-        state.isLoggedIn = effects.authenticateLogin
+export const doLogout = action(
+   async ({state, effects}) => {
+       console.log(state)
+    state.error = false
+    state.currentUser = null
+    state.isLoggedIn = false
+       console.log(state)
+
+    await effects.logout();
+    return true;
+})
+
+export const doLogin = action(
+   async ({state, effects}, credentials) => {
+    try {
+        state.error = null
+        state.currentUser = null
+
+        let { user } = await effects.login(credentials)
+
+        state.isLoggedIn = true
+        state.currentUser = credentials
+
+        console.log('state in try of doLogin action:',state)
+        return state.currentUser
     }
-)
-
-export const showHomePage = ({ state }) => {
-    state.currentPage = "home"
-    state.modalUser = null
-}
-
-export const showStateJson = ({ state }) => {
-    state.showStateJson = !state.showStateJson;
-}
+    catch (error) {
+        state.currentUser = null
+        state.error = error
+        return error
+    }
+})
 
 export const showUsersPage = action(
     async ({ value: params, state, effects }) => {

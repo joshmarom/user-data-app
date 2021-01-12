@@ -1,8 +1,8 @@
 import React from 'react'
 import { BaseProvider, LightTheme, DarkTheme } from 'baseui'
-import { Provider as StyletronProvider } from 'styletron-react'
 import { Client as Styletron } from 'styletron-engine-atomic'
 import { useOvermind } from './overmind';
+import { Provider as StyletronProvider } from 'styletron-react'
 import MainRouter from './components/main-router';
 
 const engine = new Styletron();
